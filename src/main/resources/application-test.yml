@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: predictive-portfolio-test
+  config:
+    import: classpath:test.env.properties

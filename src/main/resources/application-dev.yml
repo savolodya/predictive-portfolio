@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: predictive-portfolio-dev
+  config:
+    import: classpath:dev.env.properties
