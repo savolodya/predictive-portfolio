@@ -31,6 +31,9 @@ public class SecurityConfiguration {
 //                .addFilterBefore(authFilter())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/auth/register").permitAll()
                         .anyRequest().authenticated()
