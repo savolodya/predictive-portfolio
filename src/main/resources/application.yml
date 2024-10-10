@@ -26,5 +26,6 @@ spring:
     show-sql: true
   liquibase:
     change-log: classpath:db/liquibase/master.xml
+    enabled: false
   profiles:
     active: @spring.profiles.active@
