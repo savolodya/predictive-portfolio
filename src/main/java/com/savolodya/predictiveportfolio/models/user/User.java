@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -27,16 +28,17 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private java.util.UUID uuid;
+    @NotNull(message = "UUID has to be set")
+    private UUID uuid;
 
     @Column(nullable = false, unique = true)
     @NotNull(message = "Email has to be set")
-    @Email
+    @Email(message = "Email is not valid")
     @Size(min = 3, max = 255, message = "Email has to be between 3 and 255 characters")
     private String email;
 
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password does not match rules")
-    @NotNull(message = "Password hast to be set")
+    @NotNull(message = "Password has to be set")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -49,6 +51,7 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Status has to be set")
     private UserStatus status;
 
     @Override
