@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @Size(min = 3, max = 255, message = "Email has to be between 3 and 255 characters")
     private String email;
 
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password does not match rules")
     @NotNull(message = "Password hast to be set")
     private String password;
 
