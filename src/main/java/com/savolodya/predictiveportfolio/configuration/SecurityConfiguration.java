@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/auth/register").permitAll()
                         .anyRequest().authenticated()
                 );
 
