@@ -14,7 +14,7 @@ spring:
   application:
     name: predictive-portfolio-dev
   config:
-    import: classpath:dev.env.properties
+    import: optional:classpath:dev.env.properties
   datasource:
     url: ${DB_CONNECTION_STRING}
     username: ${DB_USERNAME}
