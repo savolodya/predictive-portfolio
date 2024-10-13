@@ -27,4 +27,7 @@ public class UserRole implements GrantedAuthority {
         return name.getKey();
     }
 
+    public UserRole(Role name) {
+        this.name = name;
+    }
 }
