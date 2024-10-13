@@ -44,16 +44,6 @@ class UserRepositoryTests {
 
     @Test
     @Order(2)
-    void should_FindUser() {
-        // when
-        User user = userRepository.findById(1L).get();
-
-        // then
-        assertThat(user.getId()).isEqualTo(1L);
-    }
-
-    @Test
-    @Order(3)
     void should_FindUserByEmail() {
         // when
         User user = userRepository.findByEmail("test@test.com").get();
@@ -63,7 +53,7 @@ class UserRepositoryTests {
     }
 
     @Test
-    @Order(4)
+    @Order(3)
     void should_FindAllUsers() {
         // when
         List<User> users = userRepository.findAll();
@@ -73,10 +63,10 @@ class UserRepositoryTests {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     void should_UpdateUserEmail() {
         // when
-        User user = userRepository.findById(1L).get();
+        User user = userRepository.findByEmail("test@test.com").get();
         user.setEmail("test2@test.com");
         User updatedUser = userRepository.save(user);
 
@@ -85,11 +75,12 @@ class UserRepositoryTests {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void should_DeleteUser() {
         // when
-        userRepository.deleteById(1L);
-        Optional<User> userOptional = userRepository.findById(1L);
+        User user = userRepository.findByEmail("test2@test.com").get();
+        userRepository.delete(user);
+        Optional<User> userOptional = userRepository.findByEmail("test2@test.com");
 
         // then
         assertThat(userOptional).isEmpty();

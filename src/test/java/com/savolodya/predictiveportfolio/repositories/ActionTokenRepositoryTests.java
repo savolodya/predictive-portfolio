@@ -85,7 +85,7 @@ class ActionTokenRepositoryTests {
         // when
         List<ActionToken> actionTokens = actionTokenRepository.findAll();
 
-        // hen
+        // then
         assertThat(actionTokens).isNotEmpty();
     }
 
@@ -93,8 +93,12 @@ class ActionTokenRepositoryTests {
     @Order(5)
     void should_DeleteActionToken() {
         // when
+        User user = userRepository.findByEmail("test@test.com").get();
+
         actionTokenRepository.deleteById(1L);
         Optional<ActionToken> actionTokenOptional = actionTokenRepository.findById(1L);
+
+        userRepository.delete(user);
 
         // then
         assertThat(actionTokenOptional).isEmpty();
