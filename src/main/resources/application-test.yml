@@ -2,7 +2,7 @@ spring:
   application:
     name: predictive-portfolio-test
   config:
-    import: classpath:test.env.properties
+    import: optional:classpath:test.env.properties
 
 url:
   service: https://test-frontend-url
