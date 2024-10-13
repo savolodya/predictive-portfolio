@@ -24,3 +24,12 @@ jobs:
         run: mvn -B package --file pom.xml -Dmaven.test.skip=true -Pprod
       - name: Tests
         run: mvn test -Pprod
+
+      - name: Coverage Report
+        run: mvn jacoco:report -prod
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
