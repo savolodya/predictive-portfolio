@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Workflow for Predictive Portfolio
 
 on:
   push:
