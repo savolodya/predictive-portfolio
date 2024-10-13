@@ -1,9 +1,7 @@
 package com.savolodya.predictiveportfolio.models.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
@@ -11,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 public class UserRole implements GrantedAuthority {
 
     @Id

@@ -1,15 +1,16 @@
 package com.savolodya.predictiveportfolio.controllers;
 
 import com.savolodya.predictiveportfolio.models.login.LoginAccountForm;
+import com.savolodya.predictiveportfolio.models.register.RegisterAccountForm;
+import com.savolodya.predictiveportfolio.services.AuthorizationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @Validated
@@ -17,6 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping("/auth")
 public class AuthorizationController {
+
+    private final AuthorizationService authorizationService;
+
+    @PutMapping("/register")
+    public ResponseEntity<Void> startRegisterAccountAction(
+            @RequestBody RegisterAccountForm form
+    ) {
+        authorizationService.createRegisterAccountAction(form.email());
+        return ResponseEntity.created(URI.create("")).build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(

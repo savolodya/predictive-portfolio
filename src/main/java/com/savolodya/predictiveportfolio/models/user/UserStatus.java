@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum UserStatus {
 
     ACTIVE,
+    PENDING_REGISTER,
     INVITED,
-    LOCKED;
+    LOCKED
 }

@@ -34,3 +34,11 @@ spring:
     enabled: false
   profiles:
     active: @spring.profiles.active@
+
+token:
+  registration:
+    duration: P1D
+
+url:
+  service: http://localhost:8080
+  finish-registration: ${url.service}/auth/register/%s

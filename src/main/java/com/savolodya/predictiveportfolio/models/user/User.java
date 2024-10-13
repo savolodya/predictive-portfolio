@@ -38,7 +38,6 @@ public class User implements UserDetails {
     private String email;
 
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password does not match rules")
-    @NotNull(message = "Password has to be set")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -53,6 +52,14 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status has to be set")
     private UserStatus status;
+
+    public User(String email, String password, List<UserRole> roles, UserStatus status) {
+        this.uuid = UUID.randomUUID();
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+        this.status = status;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

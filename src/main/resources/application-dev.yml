@@ -3,3 +3,6 @@ spring:
     name: predictive-portfolio-dev
   config:
     import: classpath:dev.env.properties
+
+url:
+  service: http://localhost:8080

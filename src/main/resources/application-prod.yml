@@ -3,3 +3,6 @@ spring:
     name: predictive-portfolio
   config:
     import: classpath:prod.env.properties
+
+url:
+  service: https://frontend-url

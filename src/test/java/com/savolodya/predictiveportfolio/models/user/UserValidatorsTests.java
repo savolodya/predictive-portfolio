@@ -120,24 +120,6 @@ class UserValidatorsTests {
     }
 
     @Test
-    void should_ValidateUser_When_PasswordIsNull() {
-        // given
-        User user = User.builder()
-                .uuid(UUID.randomUUID())
-                .email("test@test.com")
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        // when
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-
-        // then
-        assertThat(violations).hasSize(1);
-        assertThat(violations).extracting(ConstraintViolation::getMessage)
-                .containsExactlyInAnyOrder("Password has to be set");
-    }
-
-    @Test
     void should_ValidateUser_When_PasswordIsNotMatchingRules() {
         // given
         User user = User.builder()
