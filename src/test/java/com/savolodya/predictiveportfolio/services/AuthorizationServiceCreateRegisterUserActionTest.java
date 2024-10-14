@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
@@ -25,10 +28,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class AuthorizationServiceCreateRegisterAccountActionTest {
+class AuthorizationServiceCreateRegisterUserActionTest {
 
     @InjectMocks
     private AuthorizationService authorizationService;
@@ -57,15 +61,23 @@ class AuthorizationServiceCreateRegisterAccountActionTest {
                 .expiryTimestamp(Instant.now().plus(Duration.ofDays(1)))
                 .build();
 
+        User createdUser = User.builder()
+                .uuid(UUID.randomUUID())
+                .email(email)
+                .status(UserStatus.PENDING_REGISTER)
+                .build();
+
         given(userRoleRepository.findByName(Role.ADMIN))
                 .willReturn(Optional.of(adminRole));
         given(userService.loadUserByEmail(email))
                 .willReturn(Optional.empty());
+        given(userService.save(any()))
+                .willReturn(createdUser);
         given(actionTokenService.createOrResetRegisterAccountToken(any()))
                 .willReturn(actionToken);
 
         // when
-        authorizationService.createRegisterAccountAction(email);
+        authorizationService.createRegisterUserAction(email);
 
         // then
         then(userService).should(never())
@@ -105,11 +117,13 @@ class AuthorizationServiceCreateRegisterAccountActionTest {
                 .willReturn(Optional.of(adminRole));
         given(userService.loadUserByEmail(user.getEmail()))
                 .willReturn(Optional.of(user));
+        given(userService.save(any()))
+                .willReturn(user);
         given(actionTokenService.createOrResetRegisterAccountToken(any()))
                 .willReturn(actionToken);
 
         // when
-        authorizationService.createRegisterAccountAction(user.getEmail());
+        authorizationService.createRegisterUserAction(user.getEmail());
 
         // then
         then(userService).should(times(1))
@@ -149,7 +163,7 @@ class AuthorizationServiceCreateRegisterAccountActionTest {
                 .willReturn(Optional.of(user));
 
         // when
-        authorizationService.createRegisterAccountAction(user.getEmail());
+        authorizationService.createRegisterUserAction(user.getEmail());
 
         // then
         then(userService).should(never())

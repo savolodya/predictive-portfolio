@@ -94,7 +94,7 @@ class UserValidatorsTests {
                 .containsExactlyInAnyOrder("Email is not valid");
     }
 
-    @ParameterizedTest(name = "Email lLength: {0}")
+    @ParameterizedTest(name = "Email length: {0}")
     @ValueSource(ints = {2, 256})
     void should_ValidateUser_When_EmailIsOutOfBound(
             int length
@@ -117,25 +117,6 @@ class UserValidatorsTests {
                         "Email is not valid",
                         "Email has to be between 3 and 255 characters"
                 );
-    }
-
-    @Test
-    void should_ValidateUser_When_PasswordIsNotMatchingRules() {
-        // given
-        User user = User.builder()
-                .uuid(UUID.randomUUID())
-                .email("test@test.com")
-                .password("a")
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        // when
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-
-        // then
-        assertThat(violations).hasSize(1);
-        assertThat(violations).extracting(ConstraintViolation::getMessage)
-                .containsExactlyInAnyOrder("Password does not match rules");
     }
 
     @Test

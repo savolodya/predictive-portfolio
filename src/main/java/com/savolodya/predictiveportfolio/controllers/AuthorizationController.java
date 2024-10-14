@@ -1,9 +1,10 @@
 package com.savolodya.predictiveportfolio.controllers;
 
-import com.savolodya.predictiveportfolio.models.login.LoginAccountForm;
-import com.savolodya.predictiveportfolio.models.register.RegisterAccountForm;
+import com.savolodya.predictiveportfolio.models.login.LoginUserForm;
+import com.savolodya.predictiveportfolio.models.register.RegisterUserForm;
 import com.savolodya.predictiveportfolio.services.AuthorizationService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @Validated
@@ -23,15 +25,24 @@ public class AuthorizationController {
 
     @PutMapping("/register")
     public ResponseEntity<Void> startRegisterAccountAction(
-            @RequestBody RegisterAccountForm form
+            @RequestBody RegisterUserForm form
     ) {
-        authorizationService.createRegisterAccountAction(form.email());
+        authorizationService.createRegisterUserAction(form.email());
         return ResponseEntity.created(URI.create("")).build();
+    }
+
+    @PatchMapping("/register/{actionToken}")
+    public ResponseEntity<Void> finishRegisterAccountAction(
+            @Valid @RequestBody RegisterUserForm form,
+            @PathVariable UUID actionToken
+    ) {
+        authorizationService.finishRegisterUserAction(actionToken, form.password());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(
-            @RequestBody LoginAccountForm form,
+            @RequestBody LoginUserForm form,
             HttpServletRequest request
     ) {
         return ResponseEntity.ok().build();

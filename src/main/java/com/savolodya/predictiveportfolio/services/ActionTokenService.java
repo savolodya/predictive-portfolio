@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,10 @@ public class ActionTokenService {
                 .ifPresent(this::delete);
 
         return save(new ActionToken(user, Instant.now().plus(registrationTokenDuration), ActionTokenType.USER_REGISTER));
+    }
+
+    public Optional<ActionToken> findByTokenAndTypeAndExpiryTimestampAfterNow(UUID token, ActionTokenType type) {
+        return actionTokenRepository.findByTokenAndTypeAndExpiryTimestampAfter(token, type, Instant.now());
     }
 
     public void delete(ActionToken actionToken) {

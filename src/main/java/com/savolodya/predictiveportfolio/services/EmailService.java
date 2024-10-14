@@ -18,4 +18,9 @@ public class EmailService {
         log.warn("Implement email sending");
         log.info("Imitating sending registration link {} to email {}", finishRegisterUrl, email);
     }
+
+    public void sendRegisterAccountConfirmationEmail(String email) {
+        log.warn("Implement email sending");
+        log.info("Imitating sending confirmation of registration to email {}", email);
+    }
 }

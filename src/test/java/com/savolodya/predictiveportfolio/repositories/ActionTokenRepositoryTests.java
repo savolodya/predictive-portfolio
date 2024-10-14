@@ -4,10 +4,7 @@ import com.savolodya.predictiveportfolio.models.actiontoken.ActionToken;
 import com.savolodya.predictiveportfolio.models.actiontoken.ActionTokenType;
 import com.savolodya.predictiveportfolio.models.user.User;
 import com.savolodya.predictiveportfolio.models.user.UserStatus;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
@@ -30,6 +27,13 @@ class ActionTokenRepositoryTests {
     @Autowired
     private UserRepository userRepository;
 
+    private static UUID token;
+
+    @BeforeAll
+    static void setup() {
+        token = UUID.randomUUID();
+    }
+
     @Test
     @Order(1)
     void should_CreateActionToken() {
@@ -43,7 +47,7 @@ class ActionTokenRepositoryTests {
         userRepository.save(user);
 
         ActionToken actionToken = ActionToken.builder()
-                .token(UUID.randomUUID())
+                .token(token)
                 .user(user)
                 .expiryTimestamp(Instant.now().plus(Duration.ofDays(1)))
                 .type(ActionTokenType.USER_REGISTER)
@@ -81,6 +85,16 @@ class ActionTokenRepositoryTests {
 
     @Test
     @Order(4)
+    void should_FindNotExpiryActionTokenByTokenAndType() {
+        // when
+        ActionToken actionToken = actionTokenRepository.findByTokenAndTypeAndExpiryTimestampAfter(token, ActionTokenType.USER_REGISTER, Instant.now()).get();
+
+        // then
+        assertThat(actionToken.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    @Order(5)
     void should_FindAllActionTokens() {
         // when
         List<ActionToken> actionTokens = actionTokenRepository.findAll();
@@ -90,7 +104,7 @@ class ActionTokenRepositoryTests {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void should_DeleteActionToken() {
         // when
         User user = userRepository.findByEmail("test@test.com").get();
