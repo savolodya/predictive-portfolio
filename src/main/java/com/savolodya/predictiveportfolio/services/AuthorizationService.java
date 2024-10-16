@@ -8,9 +8,16 @@ import com.savolodya.predictiveportfolio.models.user.User;
 import com.savolodya.predictiveportfolio.models.user.UserRole;
 import com.savolodya.predictiveportfolio.models.user.UserStatus;
 import com.savolodya.predictiveportfolio.repositories.UserRoleRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +29,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthorizationService {
+
+    private final AuthenticationManager authenticationManager;
     private final UserRoleRepository userRoleRepository;
     private final UserService userService;
     private final ActionTokenService actionTokenService;
@@ -62,6 +71,17 @@ public class AuthorizationService {
         emailService.sendRegisterAccountConfirmationEmail(user.getEmail()); // TODO: Take out from transaction, because if will be errors in commiting transaction email should not be send.
 
         log.info("Account [{}] activated", user.getUuid());
+    }
+
+    public void authorizeAccount(String email, String password, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = authenticationManager.authenticate(auth);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Create session if not found
+        HttpSession session = request.getSession(true);
+        // Manually save SecurityContext to session repository
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
 }

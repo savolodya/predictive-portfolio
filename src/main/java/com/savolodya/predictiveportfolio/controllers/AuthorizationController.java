@@ -45,6 +45,7 @@ public class AuthorizationController {
             @RequestBody LoginUserForm form,
             HttpServletRequest request
     ) {
+        authorizationService.authorizeAccount(form.email(), form.password(), request);
         return ResponseEntity.ok().build();
     }
 }

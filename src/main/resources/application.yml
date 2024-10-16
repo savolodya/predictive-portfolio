@@ -34,6 +34,10 @@ spring:
     enabled: false
   profiles:
     active: @spring.profiles.active@
+  session:
+    redis:
+      flush-mode: immediate
+      namespace: spring:session
 
 token:
   registration:
