@@ -20,8 +20,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,7 +76,10 @@ public class AuthorizationService {
         log.info("Account [{}] activated", user.getUuid());
     }
 
-    public void authorizeAccount(String email, String password, HttpServletRequest request) {
+    public void authorizeAccount(String email, String password) {
+        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        request.getSession().invalidate();
+
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, password);
         Authentication authentication = authenticationManager.authenticate(auth);
 

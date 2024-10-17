@@ -3,7 +3,6 @@ package com.savolodya.predictiveportfolio.controllers;
 import com.savolodya.predictiveportfolio.models.login.LoginUserForm;
 import com.savolodya.predictiveportfolio.models.register.RegisterUserForm;
 import com.savolodya.predictiveportfolio.services.AuthorizationService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +41,9 @@ public class AuthorizationController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(
-            @RequestBody LoginUserForm form,
-            HttpServletRequest request
+            @RequestBody LoginUserForm form
     ) {
-        authorizationService.authorizeAccount(form.email(), form.password(), request);
+        authorizationService.authorizeAccount(form.email(), form.password());
         return ResponseEntity.ok().build();
     }
 }
