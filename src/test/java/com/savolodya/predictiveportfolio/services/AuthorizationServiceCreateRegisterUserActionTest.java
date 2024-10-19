@@ -2,10 +2,9 @@ package com.savolodya.predictiveportfolio.services;
 
 import com.savolodya.predictiveportfolio.models.actiontoken.ActionToken;
 import com.savolodya.predictiveportfolio.models.actiontoken.ActionTokenType;
-import com.savolodya.predictiveportfolio.models.user.Role;
-import com.savolodya.predictiveportfolio.models.user.User;
-import com.savolodya.predictiveportfolio.models.user.UserRole;
-import com.savolodya.predictiveportfolio.models.user.UserStatus;
+import com.savolodya.predictiveportfolio.models.team.Team;
+import com.savolodya.predictiveportfolio.models.team.TeamGrantedAuthority;
+import com.savolodya.predictiveportfolio.models.user.*;
 import com.savolodya.predictiveportfolio.repositories.UserRoleRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +15,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +37,8 @@ class AuthorizationServiceCreateRegisterUserActionTest {
     @Mock
     private UserRoleRepository userRoleRepository;
     @Mock
+    private TeamService teamService;
+    @Mock
     private UserService userService;
     @Mock
     private ActionTokenService actionTokenService;
@@ -49,9 +49,10 @@ class AuthorizationServiceCreateRegisterUserActionTest {
     private ArgumentCaptor<User> userCaptor;
 
     @Test
-    void should_OnlyCreateUserAndActionTokenAndSendToEmail_When_UserDoesNotExists() {
+    void should_OnlyCreateUserAndGetTeamAndActionTokenAndSendToEmail_When_UserDoesNotExists() {
         // given
         String email = "test@test.com";
+        String teamName = "test";
         UserRole adminRole = UserRole.builder()
                 .name(Role.ADMIN)
                 .build();
@@ -67,22 +68,41 @@ class AuthorizationServiceCreateRegisterUserActionTest {
                 .status(UserStatus.PENDING_REGISTER)
                 .build();
 
+        Team createdTeam = Team.builder()
+                .uuid(UUID.randomUUID())
+                .name(teamName)
+                .build();
+
+        UserTeam createdUserTeam = UserTeam.builder()
+                .user(createdUser)
+                .team(createdTeam)
+                .roles(Set.of(adminRole))
+                .build();
+
+        Set<TeamGrantedAuthority> authorities = Set.of(
+                new TeamGrantedAuthority(createdTeam, Set.of(adminRole))
+        );
+
         given(userRoleRepository.findByName(Role.ADMIN))
                 .willReturn(Optional.of(adminRole));
         given(userService.loadUserByEmail(email))
                 .willReturn(Optional.empty());
-        given(userService.save(any()))
+        given(teamService.findOrCreateTeam(teamName))
+                .willReturn(createdTeam);
+        given(userService.save(any(User.class)))
                 .willReturn(createdUser);
+        given(userService.save(any(UserTeam.class)))
+                .willReturn(createdUserTeam);
         given(actionTokenService.createOrResetRegisterAccountToken(any()))
                 .willReturn(actionToken);
 
         // when
-        authorizationService.createRegisterUserAction(email);
+        authorizationService.createRegisterUserAction(email, teamName);
 
         // then
         then(userService).should(never())
                 .deleteAndFlush(any());
-        then(userService).should(times(1))
+        then(userService).should(times(2))
                 .save(userCaptor.capture());
         then(emailService).should(times(1))
                 .sendRegisterAccountEmail(eq(email), any());
@@ -91,7 +111,10 @@ class AuthorizationServiceCreateRegisterUserActionTest {
         assertAll(
                 () -> assertEquals(email, capturedUser.getEmail()),
                 () -> assertNull(capturedUser.getPassword()),
-                () -> assertEquals(List.of(adminRole), capturedUser.getRoles()),
+                () -> assertArrayEquals(
+                        authorities.stream().map(TeamGrantedAuthority::getAuthority).toArray(String[]::new),
+                        capturedUser.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new)
+                ),
                 () -> assertEquals(UserStatus.PENDING_REGISTER, capturedUser.getStatus())
         );
     }
@@ -99,6 +122,7 @@ class AuthorizationServiceCreateRegisterUserActionTest {
     @Test
     void should_DeleteUserAndRegisterAndCreateUserAndActionTokenAndSendToEmail_When_UserIsPresentAndHasStatusPending() {
         // given
+        String teamName = "test";
         User user = User.builder()
                 .uuid(UUID.randomUUID())
                 .email("test@test.com")
@@ -113,22 +137,41 @@ class AuthorizationServiceCreateRegisterUserActionTest {
                 .expiryTimestamp(Instant.now().plus(Duration.ofDays(1)))
                 .build();
 
+        Team createdTeam = Team.builder()
+                .uuid(UUID.randomUUID())
+                .name(teamName)
+                .build();
+
+        UserTeam createdUserTeam = UserTeam.builder()
+                .user(user)
+                .team(createdTeam)
+                .roles(Set.of(adminRole))
+                .build();
+
+        Set<TeamGrantedAuthority> authorities = Set.of(
+                new TeamGrantedAuthority(createdTeam, Set.of(adminRole))
+        );
+
         given(userRoleRepository.findByName(Role.ADMIN))
                 .willReturn(Optional.of(adminRole));
         given(userService.loadUserByEmail(user.getEmail()))
                 .willReturn(Optional.of(user));
-        given(userService.save(any()))
+        given(teamService.findOrCreateTeam(teamName))
+                .willReturn(createdTeam);
+        given(userService.save(any(User.class)))
                 .willReturn(user);
+        given(userService.save(any(UserTeam.class)))
+                .willReturn(createdUserTeam);
         given(actionTokenService.createOrResetRegisterAccountToken(any()))
                 .willReturn(actionToken);
 
         // when
-        authorizationService.createRegisterUserAction(user.getEmail());
+        authorizationService.createRegisterUserAction(user.getEmail(), teamName);
 
         // then
         then(userService).should(times(1))
                 .deleteAndFlush(user);
-        then(userService).should(times(1))
+        then(userService).should(times(2))
                 .save(userCaptor.capture());
         then(emailService).should(times(1))
                 .sendRegisterAccountEmail(eq(user.getEmail()), any());
@@ -137,7 +180,10 @@ class AuthorizationServiceCreateRegisterUserActionTest {
         assertAll(
                 () -> assertEquals(user.getEmail(), capturedUser.getEmail()),
                 () -> assertNull(capturedUser.getPassword()),
-                () -> assertEquals(List.of(adminRole), capturedUser.getRoles()),
+                () -> assertArrayEquals(
+                        authorities.stream().map(TeamGrantedAuthority::getAuthority).toArray(String[]::new),
+                        capturedUser.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new)
+                ),
                 () -> assertEquals(UserStatus.PENDING_REGISTER, capturedUser.getStatus())
         );
     }
@@ -163,7 +209,7 @@ class AuthorizationServiceCreateRegisterUserActionTest {
                 .willReturn(Optional.of(user));
 
         // when
-        authorizationService.createRegisterUserAction(user.getEmail());
+        authorizationService.createRegisterUserAction(user.getEmail(), "test");
 
         // then
         then(userService).should(never())

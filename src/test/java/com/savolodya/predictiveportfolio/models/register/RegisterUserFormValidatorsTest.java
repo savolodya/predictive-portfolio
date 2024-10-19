@@ -24,7 +24,7 @@ class RegisterUserFormValidatorsTest {
     @Test
     void should_ValidateRegisterUserForm_When_Valid() {
         // given
-        RegisterUserForm form = new RegisterUserForm("test@test.com", "aA1!aA1!");
+        RegisterUserForm form = new RegisterUserForm("test@test.com", "aA1!aA1!", "test");
 
         // when
         Set<ConstraintViolation<RegisterUserForm>> violations = validator.validate(form);
@@ -36,7 +36,7 @@ class RegisterUserFormValidatorsTest {
     @Test
     void should_ValidateRegisterUserForm_When_EmailIsNotValid() {
         // given
-        RegisterUserForm form = new RegisterUserForm("qwerty", "aA1!aA1!");
+        RegisterUserForm form = new RegisterUserForm("qwerty", "aA1!aA1!", "test");
 
         // when
         Set<ConstraintViolation<RegisterUserForm>> violations = validator.validate(form);
@@ -53,7 +53,7 @@ class RegisterUserFormValidatorsTest {
             int length
     ) {
         // given
-        RegisterUserForm form = new RegisterUserForm(String.format("%s", "a".repeat(length)), "aA1!aA1!");
+        RegisterUserForm form = new RegisterUserForm(String.format("%s", "a".repeat(length)), "aA1!aA1!", "test");
 
         // when
         Set<ConstraintViolation<RegisterUserForm>> violations = validator.validate(form);
@@ -70,7 +70,7 @@ class RegisterUserFormValidatorsTest {
     @Test
     void should_ValidateUser_When_PasswordIsNotMatchingRules() {
         // given
-        RegisterUserForm form = new RegisterUserForm("test@test.com", "a");
+        RegisterUserForm form = new RegisterUserForm("test@test.com", "a", "test");
 
         // when
         Set<ConstraintViolation<RegisterUserForm>> violations = validator.validate(form);
@@ -79,6 +79,25 @@ class RegisterUserFormValidatorsTest {
         assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Password does not match rules");
+    }
+
+    @ParameterizedTest(name = "Team name length: {0}")
+    @ValueSource(ints = {2, 256})
+    void should_ValidateRegisterUserForm_When_TeamNameIsOutOfBound(
+            int length
+    ) {
+        // given
+        RegisterUserForm form = new RegisterUserForm("test@test.com", "aA1!aA1!", String.format("%s", "a".repeat(length)));
+
+        // when
+        Set<ConstraintViolation<RegisterUserForm>> violations = validator.validate(form);
+
+        // then
+        assertThat(violations).hasSize(1);
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder(
+                        "Team name has to be between 3 and 255 characters"
+                );
     }
 
 

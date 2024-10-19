@@ -2,7 +2,9 @@ package com.savolodya.predictiveportfolio.services;
 
 import com.savolodya.predictiveportfolio.exceptions.UserNotFoundException;
 import com.savolodya.predictiveportfolio.models.user.User;
+import com.savolodya.predictiveportfolio.models.user.UserTeam;
 import com.savolodya.predictiveportfolio.repositories.UserRepository;
+import com.savolodya.predictiveportfolio.repositories.UserTeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final UserTeamRepository userTeamRepository;
 
     @Override
     public User loadUserByUsername(String email) throws UserNotFoundException {
@@ -33,5 +36,9 @@ public class UserService implements UserDetailsService {
 
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    public UserTeam save(UserTeam userTeam) {
+        return userTeamRepository.save(userTeam);
     }
 }

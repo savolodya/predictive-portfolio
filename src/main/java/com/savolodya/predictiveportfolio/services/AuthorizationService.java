@@ -3,10 +3,8 @@ package com.savolodya.predictiveportfolio.services;
 import com.savolodya.predictiveportfolio.exceptions.ActionTokenNotFoundException;
 import com.savolodya.predictiveportfolio.models.actiontoken.ActionToken;
 import com.savolodya.predictiveportfolio.models.actiontoken.ActionTokenType;
-import com.savolodya.predictiveportfolio.models.user.Role;
-import com.savolodya.predictiveportfolio.models.user.User;
-import com.savolodya.predictiveportfolio.models.user.UserRole;
-import com.savolodya.predictiveportfolio.models.user.UserStatus;
+import com.savolodya.predictiveportfolio.models.team.Team;
+import com.savolodya.predictiveportfolio.models.user.*;
 import com.savolodya.predictiveportfolio.repositories.UserRoleRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -23,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -36,12 +34,13 @@ public class AuthorizationService {
     private final AuthenticationManager authenticationManager;
     private final UserRoleRepository userRoleRepository;
     private final UserService userService;
+    private final TeamService teamService;
     private final ActionTokenService actionTokenService;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void createRegisterUserAction(String email) {
+    public void createRegisterUserAction(String email, String teamName) {
         UserRole userRole = userRoleRepository.findByName(Role.ADMIN)
                 .orElseThrow();
 
@@ -55,7 +54,11 @@ public class AuthorizationService {
             userService.deleteAndFlush(user);
         }
 
-        User user = userService.save(new User(email, null, List.of(userRole), UserStatus.PENDING_REGISTER));
+        Team team = teamService.findOrCreateTeam(teamName);
+        User user = userService.save(new User(email, null, UserStatus.PENDING_REGISTER));
+        user.setTeams(Set.of(userService.save(new UserTeam(user, team, Set.of(userRole)))));
+        userService.save(user);
+
         ActionToken accountRegisterToken = actionTokenService.createOrResetRegisterAccountToken(user);
         emailService.sendRegisterAccountEmail(email, accountRegisterToken.getToken());
 

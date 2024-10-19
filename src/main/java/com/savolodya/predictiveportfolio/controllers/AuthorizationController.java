@@ -26,7 +26,7 @@ public class AuthorizationController {
     public ResponseEntity<Void> startRegisterAccountAction(
             @RequestBody RegisterUserForm form
     ) {
-        authorizationService.createRegisterUserAction(form.email());
+        authorizationService.createRegisterUserAction(form.email(), form.teamName());
         return ResponseEntity.created(URI.create("")).build();
     }
 

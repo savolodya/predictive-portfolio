@@ -10,5 +10,8 @@ public record RegisterUserForm(
         String email,
 
         @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password does not match rules")
-        String password
+        String password,
+
+        @Size(min = 3, max = 255, message = "Team name has to be between 3 and 255 characters")
+        String teamName
 ) {}

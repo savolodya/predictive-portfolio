@@ -1,5 +1,6 @@
 package com.savolodya.predictiveportfolio.models.user;
 
+import com.savolodya.predictiveportfolio.models.team.TeamGrantedAuthority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -9,8 +10,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -38,30 +40,26 @@ public class User implements UserDetails {
 
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<UserRole> roles;
+    @OneToMany(mappedBy = "user")
+    private transient Set<UserTeam> teams;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status has to be set")
     private UserStatus status;
 
-    public User(String email, String password, List<UserRole> roles, UserStatus status) {
+    public User(String email, String password, UserStatus status) {
         this.uuid = UUID.randomUUID();
         this.email = email;
         this.password = password;
-        this.roles = roles;
         this.status = status;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return teams.stream()
+                .map(team -> new TeamGrantedAuthority(team.getTeam(), team.getRoles()))
+                .collect(Collectors.toSet());
     }
 
     @Override
